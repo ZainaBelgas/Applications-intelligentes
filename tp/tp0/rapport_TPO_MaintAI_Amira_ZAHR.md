@@ -35,8 +35,8 @@ Prédire une panne à partir de 4 capteurs (température, vibration, charge, heu
 
 **Oui, mais de justesse, et uniquement avec la régression logistique à un seuil de 0,3.**
 
-- Rappel : 0.920 ≥ 0.90 ✔ (marge de 2 points)
-- Précision : 0.420 ≥ 0.40 ✔ (marge de 2 points)
+- Rappel : 0.920 ≥ 0.90  (marge de 2 points)
+- Précision : 0.420 ≥ 0.40  (marge de 2 points)
 
 Aucun autre modèle ne remplit les deux conditions : l'arbre de décision échoue de très peu sur le rappel (0.898) et nettement sur la précision (0.335) ; la forêt aléatoire et le gradient boosting ont une bonne précision mais un rappel insuffisant.
 
