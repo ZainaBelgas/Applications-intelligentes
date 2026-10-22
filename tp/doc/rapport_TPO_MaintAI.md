@@ -2,9 +2,9 @@
 
 
 
-\*\*Nom :\*\* Prénom Nom
+\*\*Nom : ZAHR\*\* Prénom  : Amira
 
-\*\*Groupe :\*\* G3
+\*\*Groupe :\*\* G1
 
 \*\*Module :\*\* Développement et déploiement d'applications intelligentes — S4
 
