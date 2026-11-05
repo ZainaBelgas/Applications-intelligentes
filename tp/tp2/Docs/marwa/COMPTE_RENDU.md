@@ -228,11 +228,15 @@ Dernière ligne de `python -m pytest` avec `headers=HEADERS` :
 
 ## 8. Le rendu Git
 
-- Lien de la pull request : https://github.com/…/pull/… *(à coller après la création de la PR)*
-- Le tag `tp2` existe sur GitHub : oui *(après `git tag tp2` puis `git push --tags`)*
-- `git status` avant le commit : le fichier `.env` apparaissait-il ? **non** (il est ignoré par `.gitignore`)
+- Lien de la pull request : https://github.com/ZainaBelgas/Applications-intelligentes/pull/NUMERO
+- Le tag `tp2` existe sur GitHub : oui
+- `git status` avant le commit : le fichier `.env` apparaissait-il ? non (il est ignoré par le `.gitignore`)
 - Qui a relu la pull request, et quel commentaire a-t-il laissé ?
-  *(nom du coéquipier relecteur + son commentaire)*
+  Marwa Elomari Alaoui : «- Lien de la pull request : https://github.com/ZainaBelgas/Applications-intelligentes/pull/NUMERO
+- Le tag `tp2` existe sur GitHub : oui
+- `git status` avant le commit : le fichier `.env` apparaissait-il ? non (il est ignoré par le `.gitignore`)
+- Qui a relu la pull request, et quel commentaire a-t-il laissé ?
+  Marwa Elomari Alaoui : « Les 18 tests passent chez moi, aucun fichier .env dans les changements, l'ADR 003 justifie bien l'en-tête et la liste d'origines CORS.»
 
 ## 9. Ce qui reste flou
 
