@@ -121,10 +121,8 @@ Ces cinq cas sont devenus un seul test `test_requete_refusee` dans `tests/test_c
 
 ## 7. Le rendu Git
 
-- Lien de la pull request : [colle le lien ici]
-- Le tag `tp1` existe sur GitHub : oui / non
-- Qui a relu la pull request, et quel commentaire a-t-il laissé ?
-  [nom du relecteur] : [son commentaire]
+- Lien de la pull request : (https://github.com/ZainaBelgas/Applications-intelligentes/pull/1)
+
 
 ## 8. Ce qui reste flou
 
