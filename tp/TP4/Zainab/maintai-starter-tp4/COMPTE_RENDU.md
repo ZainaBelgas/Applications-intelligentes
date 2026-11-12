@@ -1,531 +1,282 @@
-# \# Compte rendu · TP4 : MaintAI devient un package Python
+# TP4 — MaintAI devient un package Python
 
-# 
+| Informations | Détails |
+|---|---|
+| Étudiante | BELGAS Zainab |
+| Date | 12 novembre 2026 |
+| Package | MaintAI — version 0.2.0 |
+| Validation | 27 tests réussis |
 
-# \*\*Groupe :\*\* À compléter  
+## 1. Mise en place du projet
 
-# \*\*Membre :\*\* BELGAS Zainab  
+J’ai créé un environnement virtuel propre au TP4, installé les dépendances, généré les données et entraîné le modèle.
 
-# \*\*Date :\*\* 12/11/2026
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m maintai.dataset
+python -m maintai.train
+python -m pytest
+```
 
-# 
+**Résultat initial :**
 
-# \## 1. Mise en place
+```text
+2 failed, 25 passed, 1 warning in 14.21s
+```
 
-# 
+Les deux échecs concernent le fichier `tests/test_package.py` :
 
-# Le TP4 utilise un environnement virtuel `.venv` distinct de celui des autres TP.
+| Test | Cause de l’échec |
+|---|---|
+| `test_installed_version_matches_the_code` | Le package n’est pas encore installé. Ses métadonnées sont donc introuvables. |
+| `test_command_is_declared` | La commande `maintai-predict` n’est pas encore enregistrée dans l’environnement. |
 
-# 
+Ces échecs sont attendus avant la configuration et l’installation du package.
 
-# Après installation des dépendances, génération des données et entraînement du modèle, la première exécution de `python -m pytest` donne :
+## 2. Configuration et installation éditable
 
-# 
+### 2.1. Configuration de `pyproject.toml`
 
-# ```text
+J’ai ajouté les dépendances principales et déclaré la commande de prédiction :
 
-# 2 failed, 25 passed, 1 warning in 14.21s
+```toml
+dependencies = [
+    "numpy>=2.2",
+    "pandas>=2.2",
+    "scikit-learn>=1.6",
+    "joblib>=1.4",
+    "httpx>=0.28",
+]
 
-# ```
+[project.scripts]
+maintai-predict = "maintai.cli:main"
+```
 
-# 
+`pytest` appartient au groupe optionnel `dev`, car il sert à exécuter les tests. `fastapi` appartient au groupe `api`, car la prédiction locale peut fonctionner sans serveur API.
 
-# Les deux tests qui échouent sont :
+### 2.2. Installation du package
 
-# 
+```powershell
+python -m pip install -e .
+python -m pip show maintai
+```
 
-# \- `test\_installed\_version\_matches\_the\_code` : le package n’étant pas encore installé, Python ne trouve pas ses métadonnées et lève `PackageNotFoundError`.
+**Informations affichées :**
 
-# \- `test\_command\_is\_declared` : la commande `maintai-predict` n’est pas encore enregistrée dans l’environnement.
+```text
+Name: maintai
+Version: 0.2.0
+Summary: Prédiction de panne à partir de données de capteurs.
+Home-page:
+```
 
-# 
+**Essai de la commande :**
 
-# Ces échecs correspondent à l’état initial attendu du starter.
+```powershell
+maintai-predict 72 6 85 15000
+```
 
-# 
+```text
+Probabilité de panne : 95 % (ALERTE)
+```
 
-# \## 2. Sprint 1 : configuration et installation éditable
+**Résultat des tests après installation :**
 
-# 
+```text
+27 passed, 1 warning in 9.69s
+```
 
-# \### Sections complétées dans `pyproject.toml`
+L’avertissement restant concerne le client de test Starlette et son utilisation de `httpx`. Il n’entraîne aucun échec.
 
-# 
+### 2.3. Exécution depuis un autre dossier
 
-# ```toml
+Depuis le dossier temporaire Windows, la commande retourne toujours :
 
-# dependencies = \[
+```text
+Probabilité de panne : 95 % (ALERTE)
+```
 
-# &#x20;   "numpy>=2.2",
+Pour localiser le code importé, j’ai exécuté :
 
-# &#x20;   "pandas>=2.2",
+```powershell
+python -c "import maintai; print(maintai.__file__)"
+```
 
-# &#x20;   "scikit-learn>=1.6",
+**Chemin obtenu :**
 
-# &#x20;   "joblib>=1.4",
+```text
+C:\Users\BELGAS\Documents\GitHub\Applications-intelligentes\tp\TP4\Zainab\maintai-starter-tp4\maintai\__init__.py
+```
 
-# &#x20;   "httpx>=0.28",
+Python retrouve directement le dossier source grâce à l’installation éditable, indépendamment du dossier courant.
 
-# ]
+La commande `streamlit run ui/app.py` a également démarré le serveur sur `http://localhost:8501`.
 
-# 
+### 2.4. Modification sans réinstallation
 
-# \[project.scripts]
+Dans `maintai/cli.py`, j’ai remplacé « Probabilité de panne » par « Risque de panne ».
 
-# maintai-predict = "maintai.cli:main"
+Sans réinstaller le package, la commande a affiché :
 
-# ```
+```text
+Risque de panne : 95 % (ALERTE)
+```
 
-# 
+Cette modification immédiate confirme que le mode éditable utilise directement les fichiers sources du projet.
 
-# \### Pourquoi `pytest` et `fastapi` ne sont-ils pas dans `dependencies` ?
+## 3. Construction et distribution du wheel
 
-# 
+### 3.1. Construction
 
-# `pytest` sert au développement et aux tests. Il appartient donc au groupe optionnel `dev`.
+```powershell
+python -m build
+```
 
-# 
+**Résultat :**
 
-# `fastapi` est nécessaire pour lancer l’API, mais pas pour utiliser la commande de prédiction locale. Il appartient au groupe optionnel `api`.
+```text
+Successfully built maintai-0.2.0.tar.gz and maintai-0.2.0-py3-none-any.whl
+```
 
-# 
+| Fichier généré dans `dist/` | Taille |
+|---|---:|
+| `maintai-0.2.0-py3-none-any.whl` | 11 627 octets |
+| `maintai-0.2.0.tar.gz` | 12 197 octets |
 
-# Les dépendances principales correspondent aux bibliothèques nécessaires au fonctionnement du cœur du package.
+### 3.2. Vérification du contenu
 
-# 
+```powershell
+python -m zipfile -l .\dist\maintai-0.2.0-py3-none-any.whl
+```
 
-# \### Installation et vérification
+**Fichiers contenus dans le wheel :**
 
-# 
+```text
+maintai/__init__.py
+maintai/cli.py
+maintai/client.py
+maintai/config.py
+maintai/data.py
+maintai/dataset.py
+maintai/predict.py
+maintai/train.py
+maintai/api/__init__.py
+maintai/api/main.py
+maintai/api/schemas.py
+maintai/api/security.py
+maintai-0.2.0.dist-info/METADATA
+maintai-0.2.0.dist-info/WHEEL
+maintai-0.2.0.dist-info/entry_points.txt
+maintai-0.2.0.dist-info/top_level.txt
+maintai-0.2.0.dist-info/RECORD
+```
 
-# Commande utilisée :
+Le wheel contient le code du package et ses métadonnées. Le modèle, les tests et le dossier `ui/` en sont exclus. La configuration sélectionne les packages `maintai*`, tandis que le modèle reste stocké séparément dans `models/`.
 
-# 
+### 3.3. Installation dans un environnement indépendant
 
-# ```powershell
+J’ai créé un nouvel environnement dans le dossier temporaire `essai-maintai`, puis installé le wheel.
 
-# python -m pip install -e .
+| Configuration | Résultat observé |
+|---|---|
+| Sans `MAINTAI_MODELS_DIR` | Message « Modèle introuvable ». |
+| Avec le chemin du modèle | Prédiction de 95 % avec alerte et avertissements de version. |
+| Après installation de scikit-learn 1.8.0 | Prédiction de 95 % avec alerte, sans avertissement de version. |
 
-# ```
+**Commandes utilisées pour corriger la configuration :**
 
-# 
+```powershell
+$env:MAINTAI_MODELS_DIR = "C:\Users\BELGAS\Documents\GitHub\Applications-intelligentes\tp\TP4\Zainab\maintai-starter-tp4\models"
 
-# Les quatre premières lignes de `python -m pip show maintai` sont :
+python -m pip install scikit-learn==1.8.0
 
-# 
+maintai-predict 72 6 85 15000
+```
 
-# ```text
+**Résultat final :**
 
-# Name: maintai
+```text
+Risque de panne : 95 % (ALERTE)
+```
 
-# Version: 0.2.0
+### 3.4. Origine de l’avertissement de version
 
-# Summary: Prédiction de panne à partir de données de capteurs.
+Le modèle a été entraîné avec scikit-learn **1.8.0**, mais le nouvel environnement avait installé **1.9.1**.
 
-# Home-page:
+Cette différence a déclenché des avertissements `InconsistentVersionWarning` au chargement du pipeline et de ses composants.
 
-# ```
+Le fichier `models/model_info.json` précise la version d’entraînement :
 
-# 
+```json
+"sklearn_version": "1.8.0"
+```
 
-# La commande de prédiction fonctionne :
+L’installation de cette version a supprimé les avertissements. Pour réutiliser le modèle, il faut donc fournir le code, les fichiers du modèle et les versions adaptées.
 
-# 
+## 4. Questions de compréhension
 
-# ```text
+### `requirements.txt` et `dependencies`
 
-# Probabilité de panne : 95 % (ALERTE)
+Dans ce projet, `requirements.txt` fixe les versions avec `==` pour reproduire l’environnement prévu.
 
-# ```
+La liste `dependencies` de `pyproject.toml` déclare des versions minimales avec `>=`. Elle permet l’installation de versions plus récentes, qui peuvent différer de celles utilisées pendant l’entraînement.
 
-# 
+### Installation éditable et wheel
 
-# Résultat des tests après installation :
+| Mode | Fonctionnement | Utilisation |
+|---|---|---|
+| `pip install -e .` | Utilise le dossier source ; les modifications sont prises en compte immédiatement. | Développement |
+| Installation du wheel | Installe une copie construite du package, indépendante des modifications du dossier source. | Distribution |
 
-# 
+### Point d’entrée
 
-# ```text
+Un point d’entrée associe une commande du terminal à une fonction Python :
 
-# 27 passed, 1 warning in 9.69s
+```toml
+[project.scripts]
+maintai-predict = "maintai.cli:main"
+```
 
-# ```
+La commande `maintai-predict` exécute la fonction `main` du module `maintai.cli`.
 
-# 
+Sous Windows, son lanceur est créé dans :
 
-# L’avertissement concerne l’utilisation de `httpx` par le client de test Starlette. Aucun test n’échoue.
+```text
+.venv\Scripts\maintai-predict.exe
+```
 
-# 
+## 5. Livraison sur GitHub
 
-# \### Exécution depuis un autre dossier
+| Élément | État |
+|---|---|
+| Pull request | [PR #2](https://github.com/ZainaBelgas/Applications-intelligentes/pull/2) |
+| Fusion | Effectuée dans `main` |
+| Tag de livraison | [`tp4`](https://github.com/ZainaBelgas/Applications-intelligentes/tree/tp4) créé et publié |
+| Fichiers générés dans le statut Git du TP4 avant le commit | Aucun |
 
-# 
+Le fichier `.gitignore` exclut notamment :
 
-# Depuis le dossier temporaire Windows, j’ai exécuté :
+```gitignore
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/*.csv
+models/
+.env
+dist/
+build/
+*.egg-info/
+```
 
-# 
+## 6. Point à approfondir
 
-# ```powershell
+Je souhaite approfondir la gestion des versions lors de la distribution d’un modèle : les dépendances minimales permettent d’installer le package, tandis que les versions exactes aident à reproduire son environnement d’entraînement.
 
-# maintai-predict 72 6 85 15000
+## Conclusion
 
-# ```
+Ce TP4 m’a permis de rendre MaintAI installable et utilisable depuis le terminal. J’ai configuré le package, vérifié l’installation éditable, construit un wheel et testé son fonctionnement dans un environnement indépendant.
 
-# 
-
-# Résultat :
-
-# 
-
-# ```text
-
-# Probabilité de panne : 95 % (ALERTE)
-
-# ```
-
-# 
-
-# Puis :
-
-# 
-
-# ```powershell
-
-# python -c "import maintai; print(maintai.\_\_file\_\_)"
-
-# ```
-
-# 
-
-# Résultat :
-
-# 
-
-# ```text
-
-# C:\\Users\\BELGAS\\Documents\\GitHub\\Applications-intelligentes\\tp\\TP4\\Zainab\\maintai-starter-tp4\\maintai\\\_\_init\_\_.py
-
-# ```
-
-# 
-
-# Python retrouve le code dans le dossier source du TP4 grâce à l’installation éditable, même lorsque le dossier courant est différent.
-
-# 
-
-# La commande suivante a également démarré le serveur Streamlit sur `http://localhost:8501` :
-
-# 
-
-# ```powershell
-
-# streamlit run ui/app.py
-
-# ```
-
-# 
-
-# \### Modification du code sans réinstallation
-
-# 
-
-# J’ai remplacé le texte « Probabilité de panne » par « Risque de panne » dans `maintai/cli.py`.
-
-# 
-
-# Sans réinstaller le package, la commande a affiché :
-
-# 
-
-# ```text
-
-# Risque de panne : 95 % (ALERTE)
-
-# ```
-
-# 
-
-# La modification est immédiatement prise en compte, car l’installation éditable utilise directement les fichiers du projet.
-
-# 
-
-# \## 3. Sprint 2 : construction et installation du wheel
-
-# 
-
-# \### Construction
-
-# 
-
-# Commande utilisée :
-
-# 
-
-# ```powershell
-
-# python -m build
-
-# ```
-
-# 
-
-# Résultat :
-
-# 
-
-# ```text
-
-# Successfully built maintai-0.2.0.tar.gz and maintai-0.2.0-py3-none-any.whl
-
-# ```
-
-# 
-
-# Fichiers présents dans `dist/` :
-
-# 
-
-# ```text
-
-# Length  Name
-
-# 11627   maintai-0.2.0-py3-none-any.whl
-
-# 12197   maintai-0.2.0.tar.gz
-
-# ```
-
-# 
-
-# \### Contenu du wheel
-
-# 
-
-# Le contenu a été consulté avec :
-
-# 
-
-# ```powershell
-
-# python -m zipfile -l .\\dist\\maintai-0.2.0-py3-none-any.whl
-
-# ```
-
-# 
-
-# Fichiers présents :
-
-# 
-
-# ```text
-
-# maintai/\_\_init\_\_.py
-
-# maintai/cli.py
-
-# maintai/client.py
-
-# maintai/config.py
-
-# maintai/data.py
-
-# maintai/dataset.py
-
-# maintai/predict.py
-
-# maintai/train.py
-
-# maintai/api/\_\_init\_\_.py
-
-# maintai/api/main.py
-
-# maintai/api/schemas.py
-
-# maintai/api/security.py
-
-# maintai-0.2.0.dist-info/METADATA
-
-# maintai-0.2.0.dist-info/WHEEL
-
-# maintai-0.2.0.dist-info/entry\_points.txt
-
-# maintai-0.2.0.dist-info/top\_level.txt
-
-# maintai-0.2.0.dist-info/RECORD
-
-# ```
-
-# 
-
-# Le modèle, les tests et le dossier `ui/` ne sont pas dans le wheel. La configuration de découverte sélectionne uniquement les packages dont le nom commence par `maintai`. Le modèle est conservé séparément dans `models/`.
-
-# 
-
-# \### Installation dans un environnement neuf
-
-# 
-
-# J’ai créé un nouvel environnement dans :
-
-# 
-
-# ```text
-
-# C:\\Users\\BELGAS\\AppData\\Local\\Temp\\essai-maintai
-
-# ```
-
-# 
-
-# J’y ai installé le wheel, puis testé la commande.
-
-# 
-
-# | Étape | Résultat observé |
-
-# |---|---|
-
-# | Sans `MAINTAI\_MODELS\_DIR` | Message « Modèle introuvable », avec un chemin vers `site-packages\\models\\model.joblib`. |
-
-# | Avec `MAINTAI\_MODELS\_DIR` vers le dossier `models` du TP4 | Prédiction de 95 % avec alerte, accompagnée d’avertissements `InconsistentVersionWarning`. |
-
-# | Après `python -m pip install scikit-learn==1.8.0` | `Risque de panne : 95 % (ALERTE)`, sans avertissement de version. |
-
-# 
-
-# \### Explication de l’avertissement
-
-# 
-
-# Le modèle a été entraîné avec scikit-learn \*\*1.8.0\*\*, tandis que l’installation du wheel dans le nouvel environnement a installé \*\*1.9.1\*\*.
-
-# 
-
-# Lors du chargement du modèle, scikit-learn a signalé cette différence pour `StandardScaler`, `LogisticRegression` et `Pipeline`.
-
-# 
-
-# Le champ à consulter dans `models/model\_info.json` est :
-
-# 
-
-# ```json
-
-# "sklearn\_version": "1.8.0"
-
-# ```
-
-# 
-
-# L’installation de la version utilisée pendant l’entraînement a supprimé ces avertissements.
-
-# 
-
-# Cette expérience montre qu’il faut fournir le code, les fichiers du modèle et les versions nécessaires à leur utilisation.
-
-# 
-
-# \## 4. Questions de compréhension
-
-# 
-
-# \### Différence entre `requirements.txt` et `dependencies`
-
-# 
-
-# Dans ce projet, `requirements.txt` fixe les versions avec `==` pour retrouver l’environnement prévu pour les expériences.
-
-# 
-
-# La liste `dependencies` de `pyproject.toml` déclare les bibliothèques nécessaires au package avec des versions minimales utilisant `>=`. Elle autorise donc l’installation de versions plus récentes.
-
-# 
-
-# \### Différence entre installation éditable et installation du wheel
-
-# 
-
-# `pip install -e .` relie l’environnement au dossier source. Les modifications du code sont prises en compte sans réinstallation. Ce mode convient au développement.
-
-# 
-
-# L’installation du wheel copie une version construite du package dans l’environnement. Les modifications ultérieures du dossier source ne changent pas cette copie. Ce format convient à la distribution.
-
-# 
-
-# \### Qu’est-ce qu’un point d’entrée ?
-
-# 
-
-# Un point d’entrée associe une commande du terminal à une fonction Python.
-
-# 
-
-# Dans ce projet :
-
-# 
-
-# ```toml
-
-# \[project.scripts]
-
-# maintai-predict = "maintai.cli:main"
-
-# ```
-
-# 
-
-# La commande `maintai-predict` appelle la fonction `main` du module `maintai.cli`.
-
-# 
-
-# Sous Windows, pip crée le lanceur `maintai-predict.exe` dans le dossier `Scripts` de l’environnement virtuel :
-
-# 
-
-# ```text
-
-# .venv\\Scripts\\maintai-predict.exe
-
-# ```
-
-# 
-
-# \## 5. Le rendu Git
-
-# - **Lien de la pull request :** https://github.com/ZainaBelgas/Applications-intelligentes/pull/2
-# - **État de la pull request :** Fusionnée dans main.
-# - **Présence de dist/, build/ ou maintai.egg-info/ dans git status avant le commit :** Non.
-
-#- **Tag de livraison prévu :** tp4, à créer après ce commit.
-
-
-# \- \*\*Présence de `dist/`, `build/` ou `maintai.egg-info/` dans `git status` :\*\* À vérifier avant le commit.
-
-# 
-
-# Les dossiers `dist/`, `build/`, `maintai.egg-info/` et `.venv/` ne doivent pas être ajoutés au dépôt.
-
-# 
-
-# \## 6. Ce qui reste flou
-
-# 
-
-# Je souhaite approfondir la gestion des versions nécessaires pour réutiliser un modèle sauvegardé, notamment la différence entre des dépendances minimales pour installer un package et des versions exactes pour reproduire son environnement d’entraînement.
-
-# 
-
-# \## Conclusion
-
-# 
-
-# Ce TP4 m’a permis de transformer MaintAI en un package Python installable et utilisable depuis le terminal.
-
-# 
-
-# J’ai configuré les dépendances, déclaré la commande `maintai-predict` et vérifié le fonctionnement de l’installation éditable. J’ai ensuite construit un wheel et testé son installation dans un environnement indépendant.
-
-# 
-
-# Les 27 tests passent. La configuration du chemin du modèle et l’installation de scikit-learn 1.8.0 ont permis d’obtenir une prédiction sans avertissement de version dans le nouvel environnement.
-
+Les **27 tests sont réussis**. Après configuration du chemin du modèle et installation de scikit-learn **1.8.0**, la prédiction fonctionne sans avertissement de version.
