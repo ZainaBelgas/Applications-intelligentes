@@ -492,13 +492,12 @@
 
 # \## 5. Le rendu Git
 
-# 
+# - **Lien de la pull request :** https://github.com/ZainaBelgas/Applications-intelligentes/pull/2
+# - **État de la pull request :** Fusionnée dans main.
+# - **Présence de dist/, build/ ou maintai.egg-info/ dans git status avant le commit :** Non.
 
-# \- \*\*Dépôt :\*\* https://github.com/ZainaBelgas/Applications-intelligentes
+#- **Tag de livraison prévu :** tp4, à créer après ce commit.
 
-# \- \*\*Lien de la pull request :\*\* À compléter après sa création.
-
-# \- \*\*Présence du tag `tp4` sur GitHub :\*\* À vérifier après sa création.
 
 # \- \*\*Présence de `dist/`, `build/` ou `maintai.egg-info/` dans `git status` :\*\* À vérifier avant le commit.
 
