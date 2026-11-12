@@ -2,8 +2,8 @@
 
 # Compte rendu · TP3 : une interface Streamlit pour MaintAI
 
-**Étudiante :** ZAHR Amira  
-**Date :** 09/11/2026
+**Étudiante :** AMIRA ZAHR    
+**Date :** 12/11/2026
 
 ## 1. Mise en place (dans `TP/TP3`)
 
@@ -232,7 +232,7 @@ Pour une application quotidienne destinée aux techniciens de maintenance, je pr
 
 ## 6. Le rendu Git
 
-- **Lien du dépôt GitHub :** https://github.com/wiam1237/classification-des-reclamations-clients/tree/main/tp/tp3
+- **Lien du dépôt GitHub :** https://github.com/ZainaBelgas/Applications-intelligentes/tree/main/tp/Tp3/Amira
 - **Lien de la Pull Request :** Aucune Pull Request ouverte actuellement. Les Pull Requests existantes sont fermées.
 - **Le tag `tp3` existe sur GitHub :** Oui, il a été créé et pointe vers le commit `6c06bb7` de la branche `main`.
 - **`git status` avant le commit :** `On branch main`, `Your branch is up to date with 'origin/main'`, `nothing to commit, working tree clean`.

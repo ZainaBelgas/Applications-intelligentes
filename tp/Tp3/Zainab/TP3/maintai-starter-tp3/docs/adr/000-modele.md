@@ -1,6 +1,6 @@
 # ADR 000 : Sélection du modèle de classification pour la prédiction des pannes
 
-Date : 09/11/2026 · Auteurs : ZAHR Amira
+ Auteurs : BELGAS Zainab 
 
 ## Contexte
 
