@@ -3,7 +3,7 @@
 # Compte rendu · TP3 : une interface Streamlit pour MaintAI
 
 **Étudiante :** AMIRA ZAHR    
-**Date :** 12/11/2026
+**Date :** 12/11/2026 Heure: 11:00
 
 ## 1. Mise en place (dans `TP/TP3`)
 
