@@ -1,3 +1,4 @@
+
 """Client Python de l'API MaintAI : ce que fetch faisait dans la page web (TP2), en Python.
 
 Usage :
@@ -18,8 +19,12 @@ class APIError(Exception):
 
 
 class MaintaiClient:
-    def __init__(self, url: str = "http://localhost:8000", api_key: str | None = None,
-                 http: httpx.Client | None = None):
+    def __init__(
+        self,
+        url: str = "http://localhost:8000",
+        api_key: str | None = None,
+        http: httpx.Client | None = None
+    ):
         # Les tests passent leur TestClient dans http : même code, sans serveur
         self.http = http or httpx.Client(base_url=url, timeout=5.0)
         self.api_key = api_key
@@ -31,9 +36,19 @@ class MaintaiClient:
 
     def predict(self, reading: dict) -> dict:
         """Envoie un relevé ; lève APIError si l'API refuse, httpx.HTTPError si elle est injoignable."""
-        # TODO TP3 sprint 2 :
-        #   1. préparer l'en-tête {"X-API-Key": self.api_key} (seulement si une clé est donnée)
-        #   2. envoyer self.http.post("/v1/predict", json=reading, headers=...)
-        #   3. si le code n'est pas 200 : raise APIError(r.status_code, r.json().get("detail"))
-        #   4. sinon renvoyer r.json()
-        raise NotImplementedError("TP3 sprint 2 : MaintaiClient.predict")
+
+        headers = {}
+
+        if self.api_key:
+            headers["X-API-Key"] = self.api_key
+
+        r = self.http.post(
+            "/v1/predict",
+            json=reading,
+            headers=headers
+        )
+
+        if r.status_code != 200:
+            raise APIError(r.status_code, r.json().get("detail"))
+
+        return r.json()

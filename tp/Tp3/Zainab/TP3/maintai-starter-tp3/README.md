@@ -4,6 +4,10 @@ Application de prédiction de panne à partir de relevés de capteurs, construit
 
 Les données fournies sont synthétiques : `python -m maintai.dataset` les génère. Elles se remplacent par des données réelles qui gardent les mêmes colonnes.
 
+## Auteure
+
+Projet réalisé en binôme · **ZAHR Amira**
+
 ## Installation
 
 ```bash
