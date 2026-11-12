@@ -1,6 +1,5 @@
 # Compte rendu · TP4 : MaintAI devient un package Python
 
-**Groupe :** … · **Membres :** ERREYYADI Ouiam · **Date :** 09-11-2026
 
 > Remplissez chaque partie dans ce fichier, puis rendez-le avec la pull request du TP4.  
 > Collez les sorties du terminal entre les lignes ``` (trois accents graves).
@@ -129,14 +128,16 @@ L'installation de la version correspondante avec `pip install scikit-learn==1.8.
 
 ## 5. Le rendu Git
 
-- Lien de la pull request : Aucun — le travail est prévu pour être ajouté directement sur la branche `main`. [Lien du dossier TP4 sur GitHub](https://github.com/wiam1237/classification-des-reclamations-clients/tree/main/tp/tp4)
+- Lien de la pull request : Aucun — le travail est prévu pour être ajouté directement sur la branche `main`. (https://github.com/ZainaBelgas/Applications-intelligentes/edit/main/tp/TP4/amira)
 - Le tag `tp4` existe sur GitHub : à vérifier.
 - `git status` avant le commit : `dist/`, `build/` ou `maintai.egg-info/` apparaissaient-ils ? à vérifier.
 
 ## 6. Ce qui reste flou
 
-Les principales difficultés rencontrées concernent la différence entre l'installation éditable et l'installation à partir d'un fichier wheel, ainsi que la gestion du modèle entraîné dans un environnement différent.
+## Difficultés rencontrées et points à approfondir
 
-Ce TP a également permis de comprendre l'importance de la compatibilité des versions des bibliothèques, notamment scikit-learn, lors de l'entraînement et du chargement d'un modèle.
+Les principales difficultés rencontrées concernent la différence entre l'installation éditable (`pip install -e .`) et l'installation à partir d'un fichier wheel, ainsi que la gestion du modèle entraîné dans un environnement différent.
+
+Ce TP m'a également permis de comprendre l'importance de la compatibilité des versions des bibliothèques, notamment scikit-learn, entre l'entraînement et le chargement d'un modèle.
 
 Enfin, la distinction entre les dépendances nécessaires au fonctionnement du package et celles utilisées uniquement pour le développement et les tests mérite d'être approfondie.
