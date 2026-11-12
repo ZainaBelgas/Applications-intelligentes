@@ -6,7 +6,7 @@ Les données fournies sont synthétiques : `python -m maintai.dataset` les gén�
 
 ## Auteure
 
-Projet réalisé en binôme · **ZAHR Amira**
+Projet réalisé en binôme · **BELGAS Zainab**
 
 ## Installation
 

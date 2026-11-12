@@ -2,7 +2,7 @@
 
 # Compte rendu · TP3 : une interface Streamlit pour MaintAI
 
-**Étudiante :** ZAHR Amira  
+**Étudiante :** BELGAS Zainab   
 **Date :** 09/11/2026
 
 ## 1. Mise en place (dans `TP/TP3`)
@@ -251,11 +251,11 @@ Il indique que l'utilisation de `httpx` avec `starlette.testclient` est dépréc
 
 ## Conclusion
 
-Ce TP3 m'a permis de développer une interface Streamlit connectée à une API FastAPI pour explorer les données des capteurs et effectuer des prédictions de panne.
+Ce TP3 m’a permis de concevoir une interface Streamlit reliée à une API FastAPI afin de consulter les données des capteurs et de prédire les risques de panne.
 
-J'ai réalisé des indicateurs statistiques, des visualisations interactives, un formulaire de prédiction et une gestion des erreurs de communication avec l'API.
+J’y ai intégré des indicateurs statistiques, des graphiques interactifs et un formulaire de prédiction, ainsi qu’une gestion des erreurs lors des échanges avec l’API.
 
-Après avoir corrigé les problèmes de chargement des données, de chargement du modèle et d'affichage des résultats, j'ai obtenu une prédiction fonctionnelle et validé les **23 tests automatisés**.
+Les difficultés rencontrées concernant le chargement des données, l’accès au modèle et la présentation des résultats ont été résolues. Les prédictions fonctionnent désormais et les **23 tests automatisés** passent avec succès.
 
-Le projet dispose ainsi d'une interface opérationnelle permettant d'exploiter le modèle de maintenance prédictive.
+L’application dispose ainsi d’une interface fonctionnelle qui facilite l’utilisation du modèle de maintenance prédictive.
 
