@@ -159,11 +159,12 @@ Le choix dépend donc de l'objectif : personnalisation et présentation pour le 
 
 ## 6. Le rendu Git
 
-- **Lien de la pull request :** À compléter après la création de la pull request GitHub.
-- **Le tag `tp3` existe sur GitHub :** À vérifier après le push.
-- **`git status` avant le commit : `.env`, `data/` ou `models/` apparaissaient-ils ?** À vérifier dans le dépôt.
+- **Lien du dossier TP3 sur GitHub :** [TP3 — Chaimaa Ezzerag](https://github.com/ZainaBelgas/Applications-intelligentes/tree/main/tp/Tp3/chaimaa).
+- **Lien de la pull request :** Aucune pull request trouvée. Les livrables sont disponibles sur la branche `main`.
+- **Le tag `tp3` existe sur GitHub :** Le tag `tp3` n’a pas été trouvé lors de la vérification.
+- **`git status` avant le commit : `.env`, `data/` ou `models/` apparaissaient-ils ?** La sortie de cette commande n’a pas été conservée ; leur présence avant le commit ne peut donc pas être confirmée à partir de la capture GitHub.
 
-Les fichiers contenant des secrets, comme `.env`, ne doivent pas être publiés sur GitHub. Les données générées et les modèles doivent également être gérés conformément aux consignes du projet et au fichier `.gitignore`.
+Les livrables publiés comprennent les dossiers `maintai/`, `ui/` et le fichier `Compte-rendu.md`. Les fichiers contenant des secrets, comme `.env`, ne doivent pas être publiés. Les données générées et les modèles doivent être gérés conformément aux consignes du projet et au fichier `.gitignore`.
 
 ## 7. Ce qui reste flou
 
