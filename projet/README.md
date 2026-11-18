@@ -20,16 +20,18 @@
 | Nombre de sections | 9 |
 | Statut | En cours de validation |
 
-### Équipe de réalisation
 
-| N° | Membre |
-|---|---|
-| 01 | Zainab Belgas |
-| 02 | Marwa Elomari Alaoui |
-| 03 | Amira Zahr |
-| 04 | Chaimaa Ezzerag |
 
 ---
+### Équipe de réalisation
+
+| N° | Membre | Fonction |
+|---|---|---|
+| 01 | Zainab Belgas | **Responsable de l'équipe** |
+| 02 | Marwa Elomari Alaoui | Membre du projet |
+| 03 | Amira Zahr | Membre du projet |
+| 04 | Chaimaa Ezzerag | Membre du projet |
+
 
 # SOMMAIRE
 
