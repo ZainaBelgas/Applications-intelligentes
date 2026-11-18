@@ -266,3 +266,451 @@ Ces documents seront rédigés par le groupe.
 | Catégories | 6 |
 | Minimum souhaité par catégorie | 500 |
 | Période simulée | 12 mois |
+| Échantillon pour double annotation | 300 messages |
+| Questions de test RAG | 50 |
+| Documents RAG | Environ 30 à 50 pages |
+
+Ces valeurs constituent des objectifs à atteindre, pas des volumes déjà collectés.
+
+## 4.3. Variables utilisées
+
+| Variable | Description | Utilisation |
+|---|---|---|
+| ID | Identifiant unique | Identification |
+| Text | Objet et contenu de la réclamation | Entrée principale du ML |
+| Category | Catégorie réelle | Étiquette du modèle 1 |
+| Priority | Priorité réelle | Étiquette du modèle 2 |
+| Channel | Formulaire, e-mail ou chat | Analyse des biais |
+| Date | Date de réception | Découpage temporel |
+| Order_amount | Montant de la commande, si disponible | Information complémentaire pour les règles métier |
+| Source | Origine publique ou synthétique | Traçabilité |
+
+## 4.4. Préparation des données
+
+Les données subiront plusieurs traitements :
+
+1. Suppression des doublons.
+2. Suppression ou traitement des valeurs manquantes.
+3. Nettoyage léger des textes.
+4. Normalisation des espaces et caractères.
+5. Anonymisation des noms, adresses, e-mails et numéros de téléphone.
+6. Vérification des catégories et des priorités.
+7. Annotation des messages ambigus.
+8. Séparation des données d'entraînement, de validation et de test.
+
+Un échantillon de 300 messages sera annoté indépendamment par deux membres du groupe afin d'évaluer la cohérence des annotations avec le kappa de Cohen.
+
+## 4.5. Gestion de la qualité
+
+| Problème | Solution |
+|---|---|
+| Déséquilibre des classes | Pondération des classes et suivi des métriques par classe |
+| Messages ambigus | Double annotation et arbitrage |
+| Fautes d'orthographe | Nettoyage léger |
+| Doublons | Suppression avant entraînement |
+| Données personnelles | Anonymisation |
+| Différence entre données réelles et synthétiques | Identification de la source et évaluation séparée |
+
+---
+
+# 5. Métriques, baseline et critères d'acceptation
+
+## 5.1. Baseline
+
+La baseline choisie est :
+
+**TF-IDF + régression logistique avec pondération des classes.**
+
+Cette approche constitue un premier modèle de référence pour mesurer les performances de classification.
+
+Le macro-F1 attendu initialement est estimé entre 0,70 et 0,75. Il s'agit d'une hypothèse de départ qui devra être vérifiée sur le jeu de test.
+
+**Résultat réel de la baseline :** à mesurer après la première phase d'entraînement.
+
+## 5.2. Métriques principales
+
+**Pour la classification des catégories :**
+
+- Accuracy : proportion des prédictions correctes.
+- Precision : proportion des prédictions positives correctes.
+- Recall : proportion des éléments d'une classe correctement retrouvés.
+- Macro-F1 : moyenne des F1-scores des différentes catégories.
+- Matrice de confusion : visualisation des erreurs entre les catégories.
+
+La métrique principale sera le macro-F1, car les différentes catégories doivent être évaluées de manière équilibrée.
+
+**Pour la détection des urgences :**
+
+La métrique prioritaire sera le Recall de la classe urgente.
+
+Le système doit éviter de manquer les réclamations qui nécessitent une intervention rapide.
+
+## 5.3. Suivi secondaire
+
+- Precision et Recall par catégorie.
+- F1-score de chaque classe.
+- Matrice de confusion.
+- Taux de réclamations envoyées en tri manuel.
+- Temps de réponse de l'API.
+- Precision de la classe urgente.
+- Pour le RAG : fidélité des réponses aux sources et exactitude des citations.
+
+## 5.4. Critères d'acceptation
+
+| Critère | Objectif |
+|---|---|
+| Macro-F1 de classification | Au moins 0,82 |
+| Recall de la classe urgente | Au moins 90 % |
+| Gain par rapport à la baseline | Au moins 8 points de macro-F1 |
+| Latence de prédiction | Inférieure à 200 ms au 95e percentile sur CPU, objectif à mesurer |
+| Taux de tri manuel | Inférieur à 20 %, objectif à mesurer |
+| Fidélité des réponses RAG (bonus) | Au moins 90 % sur 50 questions de test |
+
+Les seuils seront évalués à partir des résultats réels. Si le modèle complexe n'apporte pas d'amélioration suffisante, la baseline sera conservée.
+
+## 5.5. Découpage des données
+
+Le découpage prévu est :
+
+- 70 % pour l'entraînement.
+- 15 % pour la validation.
+- 15 % pour le test.
+
+Le découpage sera effectué chronologiquement afin de simuler une utilisation réelle : les messages les plus récents seront réservés au test.
+
+La représentation des différentes classes sera contrôlée dans chaque partition. Les données de test ne seront jamais utilisées pendant l'entraînement ou le réglage du modèle.
+
+---
+
+# 6. Architecture prévue
+
+## 6.1. Architecture générale
+
+L'application sera organisée autour de plusieurs composants qui communiquent entre eux.
+
+```text
+                 UTILISATEUR
+                      |
+                      v
+          Réclamation client reçue
+                      |
+                      v
+          Prétraitement et anonymisation
+                      |
+                      v
+               API FASTAPI
+                      |
+             +--------+--------+
+             |                 |
+             v                 v
+       Modèle catégorie   Modèle priorité
+             |                 |
+             +--------+--------+
+                      |
+                      v
+             Résultats prédits
+                      |
+             +--------+--------+
+             |                 |
+             v                 v
+       Confiance élevée   Confiance faible
+             |                 |
+             v                 v
+       Orientation        Tri manuel
+       proposée           par un humain
+             |                 |
+             +--------+--------+
+                      |
+                      v
+              BASE POSTGRESQL
+                      |
+                      v
+             INTERFACE STREAMLIT
+                      |
+           +----------+----------+
+           |                     |
+           v                     v
+       Dashboard            Gestion des
+       et alertes           réclamations
+
+                      |
+                      v
+              SUIVI MLFLOW
+                      |
+                      v
+             Suivi des modèles
+             et réentraînement
+
+       MODULE OPTIONNEL RAG
+       FAQ + CGV -> Embeddings
+                  -> Base vectorielle
+                  -> LLM
+                  -> Réponse avec source
+```
+
+## 6.2. Description des composants
+
+| Composant | Fonction |
+|---|---|
+| Prétraitement | Nettoyer et anonymiser les messages |
+| API FastAPI | Recevoir les messages et exposer les prédictions |
+| Modèle catégorie | Identifier la catégorie de la réclamation |
+| Modèle priorité | Identifier les réclamations urgentes |
+| PostgreSQL | Stocker les réclamations, résultats et corrections |
+| Streamlit | Fournir l'interface utilisateur |
+| MLflow | Suivre les expériences et les versions des modèles |
+| DVC | Versionner les données et les étapes de traitement |
+| Docker | Conteneuriser l'application |
+| Module RAG | Proposer des réponses à partir des documents de référence |
+
+## 6.3. Fonctionnement de l'application
+
+L'utilisateur accède à l'application à travers une interface web sécurisée.
+
+Il peut :
+- Consulter les statistiques générales.
+- Ajouter ou consulter une réclamation.
+- Lancer une classification.
+- Visualiser la catégorie et la priorité.
+- Consulter le score de confiance.
+- Identifier les réclamations urgentes.
+- Corriger les résultats.
+- Consulter l'historique des réclamations.
+
+Les corrections validées pourront être conservées pour enrichir les futurs jeux de données d'entraînement.
+
+---
+
+# 7. Choix technologiques
+
+| Besoin | Outil | Justification |
+|---|---|---|
+| Langage principal | Python | Adapté au Machine Learning et au développement de l'API |
+| Manipulation des données | Pandas | Nettoyage et préparation des données |
+| Modèle de référence | Scikit-learn | Implémentation de TF-IDF et de la régression logistique |
+| NLP avancé | Hugging Face Transformers | Expérimentation de CamemBERT et DistilCamemBERT |
+| Exposition du modèle | FastAPI | Création d'une API documentée avec Swagger |
+| Interface web | Streamlit | Développement rapide d'une interface interactive |
+| Base de données | PostgreSQL | Stockage structuré des réclamations et des corrections |
+| Suivi des expériences | MLflow | Comparaison des performances et suivi des versions |
+| Versionnement des données | DVC | Reproductibilité des expériences |
+| Tests | Pytest | Vérification du fonctionnement des composants |
+| Conteneurisation | Docker et Docker Compose | Reproduction du même environnement de développement et de déploiement |
+| Assistant RAG | Sentence-Transformers et ChromaDB ou FAISS | Recherche sémantique dans les documents |
+| Génération de réponses | LLM | Création de brouillons à partir des passages retrouvés |
+
+Les outils seront intégrés progressivement selon les besoins du projet.
+
+---
+
+# 8. Risques, éthique et confidentialité
+
+Cette section répond aux huit questions demandées par le professeur.
+
+## Question 1 : Les données contiennent-elles des données personnelles ? Lesquelles ?
+
+Oui. Les réclamations réelles peuvent contenir :
+- Noms et prénoms.
+- Adresses e-mail.
+- Numéros de téléphone.
+- Adresses de livraison.
+- Numéros de commande.
+- Informations liées aux paiements.
+
+**Mesure prévue :** anonymiser les données avant l'entraînement et limiter les informations conservées dans la base de données.
+
+## Question 2 : Peut-on s'en passer ou les anonymiser ?
+
+Oui. Les informations permettant d'identifier directement les clients ne sont pas nécessaires à la classification.
+
+Nous prévoyons :
+- La suppression des noms et coordonnées.
+- Le remplacement des identifiants personnels par des identifiants fictifs.
+- La suppression des informations sensibles inutiles.
+- L'utilisation de données synthétiques lorsque cela est possible.
+
+## Question 3 : Qui peut être lésé par une erreur ?
+
+Plusieurs personnes peuvent être affectées :
+
+- Le client dont la réclamation est mal classée.
+- Le conseiller qui doit traiter une demande mal orientée.
+- Le responsable qui organise les priorités.
+- L'entreprise qui peut subir une perte financière ou une dégradation de son image.
+
+**Mesure prévue :** permettre la correction humaine des prédictions et conserver un historique des modifications.
+
+## Question 4 : Les données couvrent-elles tous les cas d'usage (lieux, périodes, populations) ?
+
+Pas nécessairement.
+
+Le corpus peut présenter des limites :
+- Messages principalement rédigés en français.
+- Peu de représentations de certains profils de clients.
+- Différences de vocabulaire selon les canaux de communication.
+- Évolution des produits et des politiques commerciales.
+- Faible représentation de certaines réclamations rares.
+
+**Mesure prévue :** analyser les performances par catégorie et par canal, diversifier les données et surveiller les changements dans les messages.
+
+## Question 5 : Quelle erreur coûte le plus, et à qui ?
+
+Le faux négatif sur la classe urgente représente le coût le plus élevé.
+
+Une réclamation urgente classée comme normale peut entraîner :
+- Un retard de prise en charge.
+- Un risque financier.
+- Une insatisfaction importante.
+- Un risque lié à un produit dangereux ou à une fraude non signalée.
+
+Le client et l'entreprise sont les principaux concernés.
+
+**Mesure prévue :** privilégier le rappel de la classe urgente, ajouter des règles métier pour les cas critiques et déclencher une vérification humaine lorsque cela est nécessaire.
+
+## Question 6 : Qui valide les décisions, et peut les corriger ?
+
+Le responsable du service client et les conseillers autorisés valident les classifications.
+
+Ils peuvent :
+- Confirmer une prédiction.
+- Modifier la catégorie.
+- Modifier la priorité.
+- Signaler une erreur.
+- Transmettre une réclamation à une autre équipe.
+
+Le système ne prend aucune décision définitive concernant les remboursements ou les compensations.
+
+**Mesure prévue :** conserver la prédiction initiale, la correction humaine, la date et l'utilisateur ayant effectué la modification.
+
+## Question 7 : Des données sortent-elles de l'organisation (API externe) ?
+
+Dans le fonctionnement prévu, les données de réclamations sont traitées par l'application et l'API FastAPI.
+
+Le traitement local sera privilégié.
+
+Si un service externe est utilisé, notamment pour un LLM dans le module RAG :
+- Les données personnelles seront supprimées avant tout envoi.
+- Les documents envoyés seront limités aux informations nécessaires.
+- Les conditions de confidentialité du fournisseur seront vérifiées.
+- L'utilisation d'une API externe sera documentée.
+
+**Mesure prévue :** limiter les échanges externes et privilégier les traitements locaux lorsque cela est possible.
+
+## Question 8 : Comment le système pourrait-il être détourné ?
+
+Plusieurs risques sont possibles :
+- Envoi massif de fausses réclamations pour saturer le système.
+- Tentatives d'accès non autorisé à l'interface.
+- Manipulation des données d'entraînement.
+- Utilisation abusive des informations clients.
+- Tentatives d'injection de prompt dans l'assistant RAG.
+- Utilisation de l'assistant pour obtenir des informations non autorisées.
+
+**Mesure prévue :**
+- Authentification des utilisateurs.
+- Gestion des rôles et des autorisations.
+- Validation des données reçues par l'API.
+- Limitation du nombre de requêtes.
+- Protection des informations sensibles.
+- Contrôle des documents et des réponses du RAG.
+- Journalisation des actions importantes.
+
+## 8.1. Tableau récapitulatif des risques
+
+| Risque | Niveau de vigilance | Mesure de prévention |
+|---|---|---|
+| Fuite de données personnelles | Élevé | Anonymisation et accès restreint |
+| Biais du modèle | Élevé | Évaluation par classe et par canal |
+| Faux négatifs urgents | Élevé | Rappel élevé et règles métier |
+| Dérive des données | Moyen | Surveillance et réentraînement |
+| Hallucinations du RAG | Élevé | Sources obligatoires et validation humaine |
+| Attaque de l'API | Élevé | Authentification et validation des entrées |
+| Données synthétiques peu réalistes | Moyen | Comparaison avec des données réelles disponibles |
+| Erreur humaine | Moyen | Historique et correction contrôlée |
+
+Le projet prendra également en compte les exigences applicables de la loi marocaine 09-08 relative à la protection des données personnelles et les principes pertinents du RGPD lorsque celui-ci est applicable.
+
+---
+
+# 9. Limites et hors périmètre
+
+## 9.1. Limites du projet
+
+Le système présente certaines limites :
+
+- Les performances dépendent de la qualité et de la diversité du dataset.
+- Les messages ambigus peuvent être mal classés.
+- Les résultats obtenus sur des données synthétiques peuvent être plus optimistes que sur des messages réels.
+- Les modèles peuvent être moins performants sur des messages très courts ou contenant des expressions inhabituelles.
+- La détection des urgences dépend de la qualité des annotations.
+- Le système peut nécessiter un réentraînement lorsque les habitudes des clients évoluent.
+
+## 9.2. Fonctionnalités hors périmètre
+
+Le projet ne prévoit pas :
+
+1. L'envoi automatique de réponses aux clients.
+2. L'intégration à un véritable CRM commercial.
+3. L'accès à un vrai système de commande ou de paiement.
+4. La réalisation automatique des remboursements.
+5. La prise de décisions financières ou commerciales.
+6. La classification des messages en arabe ou en darija dans la première version.
+7. L'analyse automatique des pièces jointes, images et fichiers PDF.
+8. La gestion complète de toutes les opérations d'une boutique en ligne.
+
+## 9.3. Périmètre fonctionnel retenu
+
+La première version de ShopExpress AI se concentre sur quatre fonctionnalités principales :
+
+- La réception et la consultation des réclamations.
+- La classification automatique en six catégories.
+- La détection des priorités urgentes et normales.
+- La visualisation des résultats et la correction humaine.
+
+L'assistant RAG constitue une fonctionnalité complémentaire qui sera développée après la réalisation des fonctionnalités obligatoires.
+
+---
+
+# ANNEXE A – Répartition des tâches du groupe
+
+| Membre | Responsabilités principales |
+|---|---|
+| Zainab Belgas | Coordination du projet, conception de l'architecture, intégration de l'API et de la base de données |
+| Marwa Elomari Alaoui | Recherche et préparation du dataset, nettoyage, anonymisation et annotation des données |
+| Amira Zahr | Développement des modèles ML, entraînement, évaluation et comparaison des métriques |
+| Chaimaa Ezzerag | Développement de l'interface Streamlit, tests, documentation et participation au module RAG |
+
+L'intégration finale, les tests et la préparation de la présentation seront réalisés collectivement.
+
+---
+
+# ANNEXE B – Livrables techniques prévus
+
+| Livrable | Contenu |
+|---|---|
+| Étude de conception | Présent document |
+| Dataset | Corpus nettoyé et annoté |
+| Notebook ML | Exploration, préparation et entraînement |
+| Modèles ML | Modèle de catégorie et modèle de priorité |
+| API | API FastAPI documentée et sécurisée |
+| Application web | Interface de gestion des réclamations |
+| Base de données | Tables et relations PostgreSQL |
+| Tests | Tests unitaires et tests d'intégration |
+| Suivi ML | Expériences MLflow et versionnement DVC |
+| Déploiement | Docker et procédure de déploiement |
+| Documentation | README, architecture et guide d'utilisation |
+| Bonus RAG | Assistant documentaire avec citations des sources |
+
+---
+
+# Conclusion
+
+ShopExpress AI vise à améliorer la gestion des réclamations clients en utilisant le Machine Learning et le traitement automatique du langage naturel.
+
+Le projet repose sur deux modèles principaux permettant d'identifier la catégorie d'une réclamation et son niveau de priorité.
+
+L'application fournit une interface permettant aux responsables de consulter les résultats, de corriger les erreurs et de suivre les performances du système.
+
+L'objectif final est de proposer une solution reproductible, sécurisée, documentée et déployable, tout en conservant la validation humaine pour les décisions importantes.
+
+L'ajout d'un assistant RAG permettra d'enrichir la solution en proposant des réponses basées sur des documents de référence, sans remplacer le rôle des conseillers.
