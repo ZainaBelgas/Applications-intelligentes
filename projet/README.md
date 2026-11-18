@@ -1,249 +1,268 @@
-# Étude de conception : Classification de réclamations clients
+# ÉTUDE DE CONCEPTION
+## ShopExpress AI – Classification intelligente des réclamations clients
 
-**Projet :** Applications intelligentes | **Sujet n°5** (assistant RAG optionnel : FAQ et conditions de vente fictives)
+**Module :** Développement et déploiement d'applications intelligentes – S2  
+**Sujet choisi :** Sujet n°5 – Classification de réclamations clients  
+**Option bonus :** Assistant RAG avec FAQ et conditions générales de vente fictives  
+**Version :** Brouillon complet – à valider et compléter au fur et à mesure du projet  
+**Date :** 18/11/2026
 
-| Groupe | |
+### Informations du groupe
+
+| Rôle | Nom |
 |---|---|
-| **Responsable du groupe** | Zainab Belgas |
-| **Membres** | Marwa Elomari Alaoui, Amira Zahr, Chaimaa Ezzerag |
-
-> **Résumé du projet en 3 lignes.** Une boutique en ligne reçoit beaucoup de réclamations écrites par ses clients. Notre système lit chaque message et trouve automatiquement (1) de quoi parle la réclamation (livraison, remboursement, produit défectueux...) et (2) si elle est urgente. Ainsi, chaque réclamation arrive directement à la bonne équipe, et les cas graves sont traités en premier.
-
----
-
-## 1. Contexte et utilisateurs
-
-### Organisation
-
-« **ShopExpress** » est une entreprise **fictive** : une boutique en ligne qui vend des produits électroniques et de l'équipement pour la maison. Elle propose la livraison à domicile et le paiement en ligne ou à la livraison.
-
-- Elle reçoit environ **600 réclamations par jour**, par formulaire web, e-mail et chat.
-- Aujourd'hui, une petite équipe lit et trie ces messages **à la main**.
-- Problèmes de ce fonctionnement : les délais de traitement sont longs, et certains messages sont envoyés à la mauvaise équipe.
-
-### Utilisateur principal
-
-Le **responsable du service client** et ses conseillers.
-
-- Ils reçoivent chaque réclamation **déjà classée** (catégorie + priorité).
-- Ils la traitent eux-mêmes ou la transmettent à l'équipe concernée : logistique, SAV (service après-vente) ou facturation.
+| Responsable du groupe | Zainab Belgas |
+| Membre | Marwa Elomari Alaoui |
+| Membre | Amira Zahr |
+| Membre | Chaimaa Ezzerag |
 
 ---
 
-## 2. Problème et décision
+# Résumé du projet
 
-### Décision
+ShopExpress AI est une application intelligente destinée à faciliter la gestion des réclamations clients d'une boutique en ligne fictive appelée ShopExpress.
 
-Pour chaque réclamation reçue, le système propose :
+L'application utilise des techniques de Machine Learning et de traitement automatique du langage naturel (NLP) pour analyser les messages envoyés par les clients, identifier automatiquement leur catégorie et déterminer leur niveau de priorité.
 
-- une **catégorie** parmi : livraison, produit défectueux ou non conforme, facturation et paiement, retour et remboursement, compte et service client, autre ;
-- une **priorité** : normale ou urgente.
+Elle permet également au responsable du service client de consulter les réclamations, de vérifier les prédictions, de corriger les erreurs et de suivre les statistiques à travers un tableau de bord.
 
-Ensuite, trois cas sont possibles :
-
-| Cas | Ce qui est décidé |
-|---|---|
-| Le système est **très sûr** de sa prédiction | La réclamation est envoyée automatiquement à l'équipe concernée. |
-| Le système est **peu sûr** (score de confiance sous un seuil à calibrer) | La réclamation va dans une **file de tri manuel** : un humain décide. |
-| La réclamation est **urgente** (fraude, produit dangereux, double prélèvement, menace de recours) | **Alerte immédiate** au responsable, quelle que soit la catégorie. |
-
-### Fréquence
-
-- **Prédiction en temps réel** : à chaque nouvelle réclamation, en moins d'une seconde.
-- **Ré-entraînement du modèle** : une fois par mois, ou plus tôt si on détecte que les messages changent (nouveaux produits, nouvelle politique de retour...). On appelle cela la **dérive des données**.
-
-### Conséquence d'une erreur
-
-Il y a deux types d'erreurs. Pour la classe « urgente » :
-
-- **Faux négatif** : une réclamation **urgente** est classée « normale » (ou envoyée à la mauvaise équipe).
-  - Conséquences : traitement retardé de plusieurs jours, client très mécontent qui peut quitter la boutique, risque juridique ou de mauvaise réputation (fraude ou produit dangereux non signalé).
-- **Faux positif** : une réclamation **normale** est classée « urgente » (ou envoyée à la mauvaise équipe).
-  - Conséquences : perte de temps pour l'équipe, file prioritaire encombrée, retransmission interne. Le coût est réel mais **récupérable**.
-
-> **Le faux négatif est le plus coûteux.** Il vaut mieux avoir quelques fausses alertes que rater un cas grave. C'est pourquoi nous fixons une contrainte forte sur le **rappel** de la classe urgente (voir section 5).
->
-> *En clair : le rappel mesure « parmi toutes les vraies réclamations urgentes, combien le système en a trouvées ? ».*
+Un assistant conversationnel basé sur le RAG (Retrieval-Augmented Generation) pourra être ajouté en option afin de proposer des réponses aux clients à partir d'une FAQ et de conditions générales de vente fictives.
 
 ---
 
-## 3. Approche par sous-problème
+# 1. Contexte et utilisateurs
 
-Nous découpons le projet en trois sous-problèmes.
+## 1.1. Organisation ou situation
 
-| Sous-problème | Approche | Pourquoi une approche plus simple ne suffit pas |
+ShopExpress est une entreprise fictive spécialisée dans la vente en ligne de produits électroniques et d'équipements pour la maison.
+
+Elle propose plusieurs services :
+- Vente de produits sur une plateforme e-commerce.
+- Livraison à domicile.
+- Paiement en ligne ou à la livraison.
+- Retours et remboursements.
+- Assistance et service après-vente.
+
+Dans le scénario étudié, l'entreprise reçoit environ 600 réclamations par jour à travers différents canaux : formulaires web, e-mails et chat.
+
+Actuellement, les réclamations sont consultées et classées manuellement par les employés du service client.
+
+Cette organisation présente plusieurs difficultés :
+- Temps important consacré au traitement des messages.
+- Retard dans la prise en charge des réclamations.
+- Mauvaise orientation de certains messages.
+- Difficulté à identifier rapidement les situations urgentes.
+- Charge de travail importante pour les conseillers.
+
+Pour répondre à ces difficultés, nous proposons une application intelligente capable d'automatiser la première étape du traitement des réclamations.
+
+*Remarque : les 600 réclamations quotidiennes constituent une hypothèse du scénario fictif et non une donnée observée dans une entreprise réelle.*
+
+## 1.2. Utilisateurs du système
+
+**Utilisateur principal : Responsable du service client**
+
+Il utilise l'application pour :
+- Consulter les nouvelles réclamations.
+- Visualiser la catégorie prédite.
+- Consulter le niveau de priorité.
+- Identifier les réclamations urgentes.
+- Vérifier les prédictions incertaines.
+- Corriger les classifications incorrectes.
+- Suivre les statistiques de traitement.
+
+**Utilisateurs secondaires : Conseillers du service client**
+
+Ils peuvent :
+- Consulter les réclamations qui leur sont attribuées.
+- Lire les messages des clients.
+- Vérifier les résultats proposés par le modèle.
+- Modifier une catégorie ou une priorité.
+- Signaler les erreurs de classification.
+
+**Équipes destinataires :**
+- Logistique.
+- Service après-vente.
+- Facturation.
+- Retours et remboursements.
+- Service client.
+
+## 1.3. Objectif général
+
+Développer une application web intelligente qui permet de classifier automatiquement les réclamations clients, de détecter les situations urgentes et de faciliter leur orientation vers les équipes concernées.
+
+---
+
+# 2. Problème et décision
+
+## 2.1. Problème à résoudre
+
+Comment automatiser la classification et la priorisation des réclamations clients afin de réduire le temps de traitement, améliorer leur orientation et éviter que les situations urgentes soient ignorées ?
+
+## 2.2. Décision prise par le système
+
+Pour chaque réclamation reçue, le système doit produire deux prédictions :
+
+**1. Classification de la catégorie**
+
+Le modèle doit identifier une catégorie parmi les six suivantes :
+
+| Code | Catégorie | Exemple |
 |---|---|---|
-| **1. Classification de la catégorie** (plusieurs classes, texte en français) | **Baseline** : TF-IDF + régression logistique. **Modèle cible** : fine-tuning d'un modèle de langue pré-entraîné en français (CamemBERT ou DistilCamemBERT), avec seuil de confiance et file de tri manuel. | Les règles par mots-clés échouent sur les reformulations, les négations (« je n'ai pas été remboursé ») et les messages qui mélangent plusieurs sujets. Le TF-IDF reste notre baseline : le modèle de langue n'est retenu **que s'il apporte un gain mesuré**. |
-| **2. Détection de priorité** (urgent / normal) | Classifieur binaire sur le même texte, combiné à quelques **règles métier** (montant élevé, mots liés à la fraude ou au danger), avec pondération de la classe urgente. | Les cas urgents sont rares (5 à 8 % des messages) et souvent écrits sans mot évident. Des règles seules les manquent ; un modèle seul peut rater des cas critiques connus. La combinaison réduit les faux négatifs. |
-| **3. (Optionnel) Suggestion de réponse par assistant RAG** | **Recherche sémantique** (embeddings + base vectorielle) dans la FAQ et les conditions de vente fictives, puis **génération d'un brouillon de réponse** par un LLM, avec **citation de la source**. L'agent valide avant envoi. | Une recherche par mots-clés dans la FAQ ne trouve pas la bonne clause quand le client formule autrement. Un LLM seul pourrait inventer des délais ou des règles : il faut l'ancrer dans les vrais documents. |
+| C1 | Livraison | Commande non reçue ou retardée |
+| C2 | Produit défectueux ou non conforme | Produit cassé ou incorrect |
+| C3 | Facturation et paiement | Double prélèvement ou problème de paiement |
+| C4 | Retour et remboursement | Demande de retour ou remboursement |
+| C5 | Compte et service client | Problème de connexion ou assistance |
+| C6 | Autre | Demande ne correspondant pas aux autres catégories |
 
-> *En clair : le **RAG** (Retrieval-Augmented Generation) cherche d'abord les bons passages dans nos documents, puis demande à l'IA de rédiger une réponse **uniquement à partir de ces passages**.*
+**2. Détection de priorité**
 
----
+Le système doit déterminer si la réclamation est :
 
-## 4. Données
+- Normale : demande classique pouvant suivre le traitement habituel.
+- Urgente : situation nécessitant une intervention rapide, comme une fraude signalée, un produit potentiellement dangereux ou un double prélèvement.
 
-### Sources
+## 2.3. Décisions selon le résultat
 
-Nous construisons un corpus de réclamations en **français** :
-
-- **(a)** données publiques de réclamations de consommateurs (par exemple la base CFPB), traduites et adaptées au contexte e-commerce ;
-- **(b)** messages **synthétiques** générés par un LLM à partir de scénarios, puis relus manuellement pour vérifier qu'ils sont réalistes.
-
-Pour la partie RAG : une **FAQ** et des **conditions générales de vente fictives**, rédigées par l'équipe (environ 30 à 50 pages).
-
-### Volumes et période (hypothèse à confirmer)
-
-- Environ **8 000 à 10 000 réclamations étiquetées**.
-- Elles représentent **12 mois simulés**.
-- Minimum **500 exemples par catégorie**.
-
-### Variables clés
-
-| Variable | Rôle |
+| Situation | Action du système |
 |---|---|
-| Texte de la réclamation (objet + corps) | Entrée principale du modèle |
-| Catégorie | Étiquette à prédire (sous-problème 1) |
-| Priorité | Étiquette à prédire (sous-problème 2) |
-| Canal (formulaire, e-mail, chat) | Information complémentaire, utile pour analyser les biais |
-| Date | Sert au découpage train / test dans le temps |
-| Montant de la commande | Aide à repérer les cas urgents (si disponible) |
+| Prédiction avec confiance élevée | Proposition d'orientation vers l'équipe concernée |
+| Prédiction avec confiance faible | Envoi dans une file de vérification manuelle |
+| Réclamation urgente | Déclenchement d'une alerte au responsable |
+| Prédiction incorrecte | Correction possible par un conseiller |
 
-### Qualité des données
+La classification automatique reste une aide à la décision. Les situations sensibles et les prédictions incertaines doivent être vérifiées par un humain.
 
-| Problème attendu | Solution prévue |
-|---|---|
-| Classes déséquilibrées (« autre » et « urgente » sont minoritaires) | Pondération des classes, suivi du rappel par classe |
-| Étiquettes ambiguës (un message parle de deux sujets) | Double annotation d'un échantillon de 300 messages, mesure de l'accord entre annotateurs (**kappa de Cohen**) |
-| Fautes d'orthographe, langage SMS | Nettoyage léger du texte, modèle robuste |
-| Doublons | Suppression avant l'entraînement |
-| Données personnelles | **Anonymisation** (noms, e-mails, téléphones, adresses) avant tout entraînement |
+## 2.4. Fréquence d'utilisation
 
----
+- Classification : à chaque nouvelle réclamation, en temps réel.
+- Consultation : plusieurs fois par jour par les responsables et les conseillers.
+- Suivi des performances : régulièrement.
+- Réentraînement : mensuel ou lorsqu'une dérive des données est détectée.
 
-## 5. Métriques, baseline et critères d'acceptation
+## 2.5. Conséquences d'une erreur
 
-### Baseline et son résultat
+**Faux négatif :** une réclamation réellement urgente est classée comme normale.
 
-- **Baseline retenue :** TF-IDF (mots et bigrammes) + régression logistique, avec pondération des classes.
-- **Résultat attendu sur le jeu de test :** **macro-F1 d'environ 0,70 à 0,75** (hypothèse, à mesurer dès la première semaine).
+Conséquences :
+- Retard dans le traitement d'un problème grave.
+- Insatisfaction du client.
+- Risque financier ou juridique.
+- Dégradation de la réputation de l'entreprise.
 
-> *En clair : la baseline est le modèle le plus simple possible. Elle sert de point de comparaison : si notre modèle plus complexe ne fait pas nettement mieux, on garde le simple.*
+**Faux positif :** une réclamation normale est classée comme urgente.
 
-### Métrique principale
+Conséquences :
+- Mobilisation inutile des conseillers.
+- Surcharge de la file prioritaire.
+- Retard dans le traitement des autres demandes.
 
-**Macro-F1** sur la catégorie, avec la contrainte : **rappel ≥ 90 % sur la classe « urgente »**.
-
-> *En clair : le macro-F1 est la moyenne des scores F1 de toutes les classes. Il traite chaque catégorie de la même façon, même les rares, ce qui évite qu'un bon score sur les grosses catégories cache de mauvais résultats sur les petites.*
-
-### Suivi secondaire
-
-- Précision et rappel **par classe**, matrice de confusion.
-- Taux de réclamations envoyées en **tri manuel**.
-- **Précision** de la classe urgente (pour surveiller les fausses alertes).
-- Pour le RAG : fidélité aux sources et taux de réponses correctes sur un jeu de 50 questions.
-
-### Critères d'acceptation (à ajuster après la baseline)
-
-1. **Performance :** macro-F1 ≥ 0,82 sur le jeu de test, avec un rappel urgent ≥ 90 %.
-   *Découpage :* 70 % entraînement / 15 % validation / 15 % test, **stratifié par classe** et **séparé par date** (le test contient les messages les plus récents) pour éviter les fuites de données.
-2. **Par rapport à la baseline :** gain d'au moins **8 points de macro-F1**. Sinon, on retient le modèle simple.
-3. **Technique :** latence inférieure à **200 ms (p95)** par réclamation sur CPU ; taux de tri manuel inférieur à **20 %**.
-4. **(Si RAG)** au moins **90 % des réponses fidèles** à la source citée sur les 50 questions de test, et aucune réponse hors périmètre sans avertissement.
+Le faux négatif représente le risque le plus important. Le projet privilégie donc un rappel élevé pour la classe urgente, même si cela peut entraîner quelques fausses alertes supplémentaires.
 
 ---
 
-## 6. Architecture prévue
+# 3. Approche par sous-problème
 
-```
-Réclamation (formulaire / e-mail / chat)
-        |
-        v
-[Prétraitement + anonymisation]
-        |
-        v
-[API FastAPI] --> [Modèle catégorie] + [Modèle priorité]
-        |                    |
-        |              (confiance faible)
-        |                    v
-        |            [File de tri manuel]
-        v
-[Base PostgreSQL : réclamations, prédictions, retours des agents]
-        |
-        v
-[Interface agent (Streamlit)] <--- [Assistant RAG optionnel]
-        |                              (FAQ + CGV -> embeddings -> base vectorielle -> LLM)
-        v
-[Suivi MLflow : métriques, versions, dérive] --> ré-entraînement mensuel
-```
+Le projet est divisé en trois sous-problèmes complémentaires.
 
-### Description des composants
-
-| N° | Composant | Rôle |
+| Sous-problème | Approche retenue | Pourquoi une approche plus simple ne suffit pas |
 |---|---|---|
-| 1 | Prétraitement et anonymisation | Nettoie le texte et supprime les données personnelles |
-| 2 | Service de prédiction | Renvoie la catégorie, la priorité et un score de confiance |
-| 3 | Base de données | Stocke les réclamations, les prédictions et les **corrections des agents** (réutilisées comme nouvelles étiquettes pour le ré-entraînement) |
-| 4 | Interface agent | Permet au responsable de trier, visualiser et corriger |
-| 5 | Module RAG (optionnel) | Propose un brouillon de réponse avec citation de la source |
-| 6 | Suivi MLflow | Garde l'historique des expériences, des versions de modèles et des performances dans le temps |
+| 1. Classification des catégories | TF-IDF + régression logistique comme baseline, puis expérimentation de CamemBERT ou DistilCamemBERT | Les règles par mots-clés ne comprennent pas suffisamment les reformulations, les négations et les messages contenant plusieurs informations. |
+| 2. Détection de priorité | Classification binaire avec Machine Learning et règles métier complémentaires | Les règles seules ne détectent pas tous les cas urgents. Un modèle seul peut également manquer certains cas critiques connus. |
+| 3. Suggestion de réponses (optionnel) | RAG avec embeddings, base vectorielle et LLM | Une recherche classique par mots-clés ne retrouve pas toujours les passages pertinents. Un LLM seul risque de produire des informations incorrectes. |
+
+## 3.1. Classification des catégories
+
+Le premier modèle analyse le texte de la réclamation et prédit une catégorie parmi les six classes définies.
+
+Approche :
+- Nettoyage du texte.
+- Transformation des messages en représentations numériques avec TF-IDF.
+- Entraînement d'une régression logistique.
+- Évaluation des résultats.
+- Expérimentation avec CamemBERT ou DistilCamemBERT.
+- Comparaison des performances.
+
+Le modèle le plus complexe sera retenu uniquement s'il apporte une amélioration mesurable par rapport à la baseline.
+
+## 3.2. Détection de priorité
+
+Le deuxième modèle détermine si une réclamation est normale ou urgente.
+
+Il utilise :
+- Le texte du message.
+- Les informations complémentaires disponibles.
+- Des règles métier pour certains cas critiques.
+- Une pondération des classes afin de mieux prendre en compte les réclamations urgentes.
+
+Le système doit particulièrement limiter les faux négatifs.
+
+## 3.3. Assistant conversationnel RAG (optionnel)
+
+Le module RAG permettra au responsable ou au conseiller de poser des questions concernant les conditions de vente et les procédures de l'entreprise.
+
+Fonctionnement :
+1. Importation des documents FAQ et conditions générales de vente.
+2. Découpage des documents en passages.
+3. Transformation des passages en embeddings.
+4. Stockage dans une base vectorielle.
+5. Recherche des passages pertinents.
+6. Génération d'une réponse à partir des informations retrouvées.
+7. Affichage des sources utilisées.
+
+L'assistant proposera uniquement des brouillons de réponses qui devront être validés par un conseiller avant tout envoi.
+
+## 3.4. Tableau récapitulatif des sous-problèmes et des données
+
+| Sous-problème | Approche | Jeu de données | Source et licence | Volume prévu | Données personnelles |
+|---|---|---|---|---|---|
+| Classification des catégories | TF-IDF, régression logistique, CamemBERT | Réclamations textuelles annotées | Corpus public de réclamations de consommateurs, notamment CFPB, sous réserve de vérification des conditions de réutilisation ; compléments synthétiques | 8 000 à 10 000 messages visés | Oui dans certaines sources ; anonymisation nécessaire |
+| Détection de priorité | Classification binaire et règles métier | Réclamations annotées urgentes/normales | Même corpus, avec annotations de priorité réalisées par l'équipe | Même corpus ; proportion urgente estimée entre 5 et 8 % | Oui dans certaines sources ; anonymisation nécessaire |
+| Assistant RAG (optionnel) | Embeddings, recherche vectorielle, LLM | FAQ et conditions générales de vente fictives | Documents rédigés par l'équipe | Environ 30 à 50 pages | Non, si les documents ne contiennent aucune donnée personnelle |
+
+Les volumes présentés sont des objectifs de constitution du corpus et devront être confirmés après la collecte.
 
 ---
 
-## 7. Choix technologiques
+# 4. Données
 
-| Technologie | Pourquoi ce choix |
-|---|---|
-| **Python + scikit-learn** | Baseline rapide à construire et reproductible |
-| **Hugging Face Transformers (CamemBERT / DistilCamemBERT)** | Modèles déjà entraînés pour le français, utilisables avec peu de données. La version « Distil » est plus rapide, donc meilleure pour la contrainte de latence |
-| **FastAPI** | API légère et rapide pour exposer le modèle |
-| **PostgreSQL** | Stockage structuré des réclamations et des retours des agents |
-| **MLflow** | Suivi des expériences et des versions de modèles |
-| **Sentence-Transformers + ChromaDB ou FAISS, et un LLM** (partie RAG) | Recherche sémantique en local et génération ancrée dans les documents |
-| **Streamlit** | Interface de démonstration créée très vite |
-| **Docker** | Même environnement sur les machines des 4 membres du groupe |
+## 4.1. Sources des données
 
----
+Le projet nécessite un corpus de réclamations clients rédigées en français.
 
-## 8. Risques, éthique, confidentialité
+Deux sources principales sont envisagées :
 
-| Risque | Explication | Mesure prévue |
-|---|---|---|
-| **Données personnelles** | Les réclamations contiennent noms, e-mails, téléphones, adresses, numéros de commande | Anonymisation (règles + reconnaissance d'entités nommées) avant l'entraînement et avant tout envoi à un LLM externe ; accès restreint ; durée de conservation limitée ; respect de la loi marocaine **09-08 (CNDP)** et des principes du **RGPD** |
-| **Biais** | Résultats possiblement moins bons pour les messages en dialecte, mélangeant plusieurs langues ou très courts : certains clients seraient moins bien traités | Mesure du F1 **par canal et par type de message** |
-| **Dérive des données** | Nouveaux produits, nouvelles politiques ou promotions changent le vocabulaire | Surveillance de la distribution des classes et du taux de tri manuel |
-| **Trop grande confiance dans l'automatique** | Un agent peut valider sans relire | Affichage du score de confiance, audits aléatoires |
-| **Hallucinations (RAG)** | Réponse inventée ou clause mal citée | Citation obligatoire de la source, refus de répondre si aucun passage pertinent, validation humaine avant envoi |
-| **Données synthétiques** | Elles peuvent être plus « propres » que la réalité | Présenter les résultats comme **indicatifs** |
+**Source 1 : Données publiques**
 
----
+Utilisation éventuelle de la base CFPB (Consumer Financial Protection Bureau) contenant des réclamations de consommateurs.
 
-## 9. Limites et hors périmètre
+Les messages pertinents seront étudiés, traduits et adaptés au contexte du commerce électronique lorsque cela est justifié.
 
-### Ce que le projet ne couvre pas
+La licence et les conditions de réutilisation de la source seront vérifiées avant son intégration au projet.
 
-- **Pas de réponse envoyée automatiquement** au client : un humain valide toujours.
-- **Pas d'intégration** à un vrai CRM ni à un vrai système de commande : les données sont fictives.
-- **Langue :** le français uniquement. L'arabe et la darija ne sont pas couverts (extension possible).
-- **Pas de décision** de remboursement, de sanction ou de compensation : le système **trie**, il ne **tranche** pas.
-- **Pas d'analyse de pièces jointes** (photos, PDF).
+**Source 2 : Données synthétiques**
 
-### Limites connues
+Création de messages fictifs à partir de scénarios de réclamations clients.
 
-- Un message qui traite de plusieurs sujets n'a qu'**une seule catégorie principale**.
-- Les résultats sur données synthétiques peuvent être **plus optimistes** que sur de vraies réclamations.
-- Le module RAG est **optionnel** et dépend du temps disponible.
+Les messages seront générés, puis vérifiés et annotés manuellement par les membres du groupe.
 
----
+Les données synthétiques seront identifiées séparément des données publiques.
 
-## Annexe : répartition du travail proposée
+**Source complémentaire pour le RAG :**
 
-*(à adapter par le groupe)*
+- FAQ fictive de ShopExpress.
+- Conditions générales de vente fictives.
+- Procédures de livraison.
+- Procédures de retour et de remboursement.
 
-| Membre | Rôle proposé |
-|---|---|
-| **Zainab Belgas** (responsable) | Coordination, architecture et intégration (API, base de données) |
-| **Marwa Elomari Alaoui** | Données : collecte, nettoyage, anonymisation, annotation |
-| **Amira Zahr** | Modèles : baseline, fine-tuning, évaluation des métriques |
-| **Chaimaa Ezzerag** | Assistant RAG, interface Streamlit, documentation et tests |
+Ces documents seront rédigés par le groupe.
 
+## 4.2. Volume prévu
+
+| Élément | Volume prévu |
+|---|---:|
+| Réclamations totales | 8 000 à 10 000 |
+| Catégories | 6 |
+| Minimum souhaité par catégorie | 500 |
+| Période simulée | 12 mois |
