@@ -270,3 +270,14 @@ Les runs portent sur des jeux de données et des partitions test différents. Un
 ### Quels éléments faut-il pour livrer un modèle ?
 
 Il faut le code, les dépendances compatibles et le modèle entraîné. Ici, le package et ses dépendances sont décrits dans le projet, MLflow archive les dépendances avec chaque artefact de modèle, et le modèle final est généré dans `models/`. Les données sont suivies séparément avec DVC.
+
+---
+## Points clés vérifiés
+
+Tests (pytest) : 32 tests réussis (32 passed, 4 warnings).
+
+DVC : pointeur data/sensors.csv.dvc aligné sur la v2 finale (8 000 relevés, md5: 93fdeef2cac1893c4f720c16457eea75), remote local stockage sur C:/dvc-stockage.
+
+Grid Search (maintai.grid) : 25 essais évalués ; essai 22 retenu (C=10.0, seuil 0.15, recall=0.859, precision=0.507, accuracy=0.875, F2=0.754).
+
+Rendu GitHub : pousser les fichiers dans tp/tp5/marwa, ouvrir la Pull Request, renseigner son lien dans COMPTE_RENDU.md et pousser le tag tp5.
