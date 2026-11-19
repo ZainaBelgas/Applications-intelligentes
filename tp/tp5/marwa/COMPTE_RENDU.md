@@ -5,7 +5,7 @@
 - **Étudiante :** Marwa Elomari Alaoui
 - **Groupe :** G1
 - **Date :** 19/11/2026
-- - **heure :** 12:15
+- **heure :** 12:15
 - **Environnement :** Windows PowerShell, Python 3.13.3, environnement virtuel `.venv`, pytest 9.1.1, DVC 3.67.1 et MLflow 3.18.0
 
 ---
