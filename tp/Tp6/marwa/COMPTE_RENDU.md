@@ -1,6 +1,6 @@
 # Compte rendu · TP6 : conteneuriser MaintAI (Docker, Docker Compose)
 
-**Groupe :** G51  ·  **Membre :** Marwa Elomari Alaoui  ·  **Date :** 26/11/2026  ·  **Heure de dépôt :** 11:40
+**Groupe :** G51  ·  **Membre :** Marwa Elomari Alaoui  ·  **Date :** 26/11/2026  ·  **Heure de dépôt :** 11:52
 
 **Cours :** Développement et déploiement d'applications intelligentes · Séance 8
 
