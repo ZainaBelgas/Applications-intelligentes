@@ -189,8 +189,30 @@ Lien du dossier du TP6 sur GitHub (branche main) : https://github.com/ZainaBelga
 
 ## 9. Ce qui reste flou
 
-Les points que je souhaite encore approfondir :
+Les points que je comprends en partie et que je souhaite encore approfondir.
 
-le sens de localhost selon l'endroit d'où l'on appelle (PC ou conteneur), et quand utiliser le nom du service api ;
-la différence entre ce qui est copié dans l'image et ce qui est fourni au lancement par un volume ou par .env ;
-l'enchaînement Git du rendu : branche, commit, push, pull request, fusion et tag.
+### 9.1 Le démarrage des conteneurs dans Compose
+
+- **Ce que j'ai compris :** `depends_on: api` lance `api` avant `ui`.
+- **Ce qui reste flou :** `depends_on` n'attend pas que l'API soit prête à répondre (modèle chargé). Je ne sais pas encore comment attendre qu'elle soit prête, par exemple avec un `healthcheck` sur `/health`.
+
+### 9.2 Les volumes et le modèle
+
+- **Ce que j'ai compris :** le modèle arrive par un volume en lecture seule (`:ro`), donc sans reconstruire l'image.
+- **Ce qui reste flou :**
+  - comment le modèle serait fourni en production, sans dossier `./models` sur un PC ;
+  - comment garantir que le modèle monté est bien compatible avec `scikit-learn==1.8.0` de l'image.
+
+### 9.3 Les tests du début du TP
+
+- **Ce que j'ai observé :** `5 failed, 33 passed` à la mise en place, puis `38 passed` à la fin du sprint 2.
+- **Ce qui reste flou :** je ne sais pas expliquer précisément pourquoi ces 5 tests échouaient au départ, ni lequel de mes changements (Dockerfile, Compose, fichiers montés) les a fait passer.
+
+### 9.4 La taille de l'image
+
+- **Ce que j'ai observé :** l'image fait 1.13 Go, même après une modification de `predict.py`.
+- **Ce qui reste flou :** quelles couches pèsent le plus, et comment réduire la taille (par exemple avec `docker history` ou un build en plusieurs étapes).
+
+### 9.5 L'enchaînement Git du rendu
+
+- **Ce qui reste flou :** l'ordre exact `branche → commit → push → pull request → fusion → tag`, le rôle de chaque étape, et le moment où créer le tag. J'ai poussé directement sur `main` ; je dois comprendre quand passer par une branche et une pull request.
