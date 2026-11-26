@@ -2,8 +2,6 @@
 
 **Groupe :** G1  ·  **Membre :** Amira Zahr  ·  **Date :** 26/11/2026 Heure:11:45
 
-> Remplissez chaque partie dans ce fichier, puis rendez-le avec la pull request du TP6.
-> Collez les sorties du terminal entre les lignes ``` (trois accents graves).
 
 ---
 
