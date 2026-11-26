@@ -72,6 +72,8 @@ ENV MAINTAI_DATA_PATH=/app/data/sensors.csv
 EXPOSE 8000
 CMD ["uvicorn", "maintai.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
+Dernière ligne de python -m pytest après le Dockerfile et .dockerignore :
+2 failed, 36 passed, 6 warnings in 46.91s
 
 | Build | Durée | Taille de l'image (`docker images`) |
 |---|---|---|
