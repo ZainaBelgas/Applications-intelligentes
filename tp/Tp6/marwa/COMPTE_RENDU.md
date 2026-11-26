@@ -1,6 +1,6 @@
 # Compte rendu · TP6 : conteneuriser MaintAI (Docker, Docker Compose)
 
-**Groupe :** G51  ·  **Membre :** Marwa Elomari Alaoui  ·  **Date :** 26/11/2026  ·  **Heure de dépôt :** 11:40
+**Groupe :** G51  ·  **Membre :** Marwa Elomari Alaoui  ·  **Date :** 26/11/2026  ·  **Heure de dépôt :** 11:52
 
 **Cours :** Développement et déploiement d'applications intelligentes · Séance 8
 
@@ -217,13 +217,20 @@ Le modèle arrive par un volume en lecture seule, pour en changer sans reconstru
 
 ## 8. Le rendu Git
 
-- Lien de la pull request : _(à écrire après le push)_
-- Le tag `tp6` existe sur GitHub : _(à écrire après le push : oui / non)_
-- `git status` avant le commit : `.env`, `models/` ou `data/*.csv` apparaissaient-ils ? _(à écrire après `git status` : oui / non)_
+- Lien du dossier GitHub :https://github.com/ZainaBelgas/Applications-intelligentes/blob/main/tp/Tp6/marwa
 
 ## 9. Ce qui reste flou
 
-_(à écrire avec mes propres mots)_
+## 9. Ce qui reste flou
+
+J'ai bien compris le principe de Docker et la différence entre une image et un conteneur. Cependant, certains points restent encore un peu difficiles pour moi :
+
+- Je ne comprends pas encore totalement comment Docker Compose organise la communication entre plusieurs conteneurs.
+- J'ai encore quelques difficultés à comprendre le fonctionnement des volumes et la différence entre les fichiers présents dans l'image et ceux ajoutés au lancement.
+- Je voudrais mieux comprendre le système de cache de Docker et savoir dans quels cas il reconstruit les couches.
+- Je dois encore pratiquer les commandes Docker pour être plus à l'aise dans la gestion des conteneurs et des images.
+
+Avec plus de pratique, je pense pouvoir mieux maîtriser ces notions et devenir plus autonome dans le déploiement de mes applications.
 
 ## 10. Synthèse des critères de réussite
 
