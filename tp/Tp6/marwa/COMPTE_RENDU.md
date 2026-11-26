@@ -44,7 +44,7 @@ Server: Docker Desktop 4.54.0 (212467)
 Dernière ligne de `python -m pytest` après la mise en place :
 
 ```
-38 passed, 4 warnings in 58.33s (0:00:58)
+5 failed, 33 passed, 6 warnings in 32.36s
 ```
 
 ## 2. Image et conteneur (pendant le premier build)
