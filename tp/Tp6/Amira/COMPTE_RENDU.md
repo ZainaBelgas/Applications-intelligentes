@@ -77,8 +77,8 @@ Dernière ligne de python -m pytest après le Dockerfile et .dockerignore :
 
 | Build | Durée | Taille de l'image (`docker images`) |
 |---|---|---|
-| premier build | … | 1.13GB |
-| après une modification de `maintai/predict.py` | … | 1.13GB |
+| premier build |2 min 05 s | 1.13GB |
+| après une modification de `maintai/predict.py` |	0,7 s | 1.13GB |
 
 Que signifie `CACHED` dans le journal du second build ?
 
